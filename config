@@ -251,10 +251,10 @@ case "${SYSTEM}:${RELEASE}:${VERSION}:${MACHINE}" in
     Darwin:*)
 	case "$MACHINE" in
 	    Power*)
-		echo "ppc-apple-darwin${VERSION}"
+		echo "ppc-apple-darwin${RELEASE}"
 		;;
 	    *)
-		echo "${MACHINE}-apple-darwin${VERSION}"
+		echo "${MACHINE}-apple-darwin${RELEASE}"
 		;;
 	esac
 	exit 0
@@ -458,6 +458,25 @@ case "$GUESSOS" in
 	OUT="irix-mips3-$CC"
 	;;
   ppc-apple-rhapsody) OUT="rhapsody-ppc-cc" ;;
+  ppc-apple-darwin[1-7].*)
+	OUT="darwin7-ppc-cc"
+	;;
+  ppc*-apple-darwin8.*)
+	ISA64=`(sysctl -n hw.optional.64bitops) 2>/dev/null`
+	if [ "$ISA64" = "1" -a -z "$KERNEL_BITS" ]; then
+	    echo "WARNING! If you wish to build 64-bit library for old Mac OS X"
+	    echo "         (Mac OS X < 10.5 or Darwin < 9)"
+	    echo "         invoke '$THERE/Configure darwin8-ppc64-cc' *manually*."
+	    if [ "$DRYRUN" = "false" -a -t 1 ]; then
+	      echo "         You have about 5 seconds to press Ctrl-C to abort."
+	      (trap "stty `stty -g`; exit 0" 2 0; stty -icanon min 0 time 50; read waste) <&1
+	    fi
+	fi
+	if [ "$ISA64" = "1" -a "$KERNEL_BITS" = "64" ]; then
+	    OUT="darwin8-ppc64-cc"
+	elif [ `echo $RELEASE | cut -d. -f1` -lt 9 ] ; then
+	    OUT="darwin8-ppc-cc"
+	fi ;;
   ppc-apple-darwin*)
 	ISA64=`(sysctl -n hw.optional.64bitops) 2>/dev/null`
 	if [ "$ISA64" = "1" -a -z "$KERNEL_BITS" ]; then
@@ -473,6 +492,22 @@ case "$GUESSOS" in
 	else
 	    OUT="darwin-ppc-cc"
 	fi ;;
+  i?86-apple-darwin[1-8].*)
+	ISA64=`(sysctl -n hw.optional.x86_64) 2>/dev/null`
+	if [ "$ISA64" = "1" -a -z "$KERNEL_BITS" ]; then
+	    echo "WARNING! If you wish to build 64-bit library for old Mac OS X"
+	    echo "         (Mac OS X < 10.5 or Darwin < 9)"
+	    echo "         invoke '$THERE/Configure darwin8-x86_64-cc' *manually*."
+	    if [ "$DRYRUN" = "false" -a -t 1 ]; then
+	      echo "         You have about 5 seconds to press Ctrl-C to abort."
+	      (trap "stty `stty -g`; exit 0" 2 0; stty -icanon min 0 time 50; read waste) <&1
+	    fi
+	fi
+	if [ "$ISA64" = "1" -a "$KERNEL_BITS" = "64" ]; then
+	    OUT="darwin8-x86_64-cc"
+	elif [ `echo $RELEASE | cut -d. -f1` -lt 9 ] ; then
+	    OUT="darwin8-i386-cc"
+	fi ;;
   i?86-apple-darwin*)
 	ISA64=`(sysctl -n hw.optional.x86_64) 2>/dev/null`
 	if [ "$ISA64" = "1" -a -z "$KERNEL_BITS" ]; then
@@ -487,6 +522,12 @@ case "$GUESSOS" in
 	    OUT="darwin64-x86_64-cc"
 	else
 	    OUT="darwin-i386-cc"
+	fi ;;
+  x86_64-apple-darwin[1-8].*)
+	if [ "$KERNEL_BITS" = "32" ]; then
+	    OUT="darwin8-i386-cc"
+	else
+	    OUT="darwin8-x86_64-cc"
 	fi ;;
   x86_64-apple-darwin*)
 	if [ "$KERNEL_BITS" = "32" ]; then
