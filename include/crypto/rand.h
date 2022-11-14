@@ -23,12 +23,22 @@
 # include "crypto/rand_pool.h"
 
 # if defined(__APPLE__) && !defined(OPENSSL_NO_APPLE_CRYPTO_RANDOM)
-#  include <Availability.h>
-#  if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101200) || \
-     (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 80000)
-#   define OPENSSL_APPLE_CRYPTO_RANDOM 1
-#   include <CommonCrypto/CommonCryptoError.h>
-#   include <CommonCrypto/CommonRandom.h>
+#  include <TargetConditionals.h>
+#  if defined(TARGET_OS_IPHONE)
+#   include <Availability.h>
+#   if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101200) || \
+      (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 80000)
+#    define OPENSSL_APPLE_CRYPTO_RANDOM 1
+#    include <CommonCrypto/CommonCryptoError.h>
+#    include <CommonCrypto/CommonRandom.h>
+#   endif
+#  else
+#   include <AvailabilityMacros.h>
+#   if (defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101200)
+#    define OPENSSL_APPLE_CRYPTO_RANDOM 1
+#    include <CommonCrypto/CommonCryptoError.h>
+#    include <CommonCrypto/CommonRandom.h>
+#   endif
 #  endif
 # endif
 
