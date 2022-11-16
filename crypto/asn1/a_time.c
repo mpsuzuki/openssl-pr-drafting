@@ -22,6 +22,11 @@
 #include <openssl/asn1t.h>
 #include "asn1_local.h"
 
+#if defined( __APPLE__ ) && defined( __DARWIN_BYTE_ORDER )
+# include <TargetConditionals.h>
+# include <AvailabilityMacros.h>
+#endif
+
 IMPLEMENT_ASN1_MSTRING(ASN1_TIME, B_ASN1_TIME)
 
 IMPLEMENT_ASN1_FUNCTIONS(ASN1_TIME)
@@ -596,6 +601,8 @@ int ASN1_TIME_compare(const ASN1_TIME *a, const ASN1_TIME *b)
 #endif
 
 #ifdef __FreeBSD__
+# define USE_TIMEGM
+#elif defined(MAC_OS_X_VERSION_MIN_REQUIRED) && defined(MAC_OS_X_VERSION_10_4) && (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
 # define USE_TIMEGM
 #endif
 
